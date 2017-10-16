@@ -1,19 +1,16 @@
 #include <Wire.h>
 #include "Adafruit_TCS34725.h"
 
-// Pick analog outputs, for the UNO these three work well
-// use ~560  ohm resistor between Red & Blue, ~1K for green (its brighter)
+// Analog outputs
 #define redpin 3
 #define greenpin 6
 #define bluepin 5
 int pushButton = 2;
-// for a common anode LED, connect the common pin to +5V
-// for common cathode, connect the common to ground
 
 // set to false if using a common cathode LED
 #define commonAnode true
 
-// our RGB -> eye-recognized gamma color
+// Our RGB -> eye-recognized gamma color
 byte gammatable[256];
 
 
@@ -21,23 +18,22 @@ Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_50MS, TCS3472
 
 void setup() {
   Serial.begin(9600);
-  Serial.println("Color View Test!");
-
+// Checking connection between arduino and sensor
   if (tcs.begin()) {
-    Serial.println("Found sensor");
+    
   } else {
     Serial.println("No TCS34725 found ... check your connections");
     while (1); // halt!
   }
   
-  // use these three pins to drive an LED
+  //Three pins to drive an LED
   pinMode(redpin, OUTPUT);
   pinMode(greenpin, OUTPUT);
   pinMode(bluepin, OUTPUT);
+  //Pin to control the button
   pinMode(pushButton, INPUT);
-  
-  // thanks PhilB for this gamma table!
-  // it helps convert RGB colors to what humans see
+ 
+  //This helps convert RGB colors to what humans see
   for (int i=0; i<256; i++) {
     float x = i;
     x /= 255;
@@ -64,11 +60,17 @@ void loop() {
   tcs.getRawData(&red, &green, &blue, &clear);
 
   tcs.setInterrupt(true);  // turn off LED
+  // When pressing the button, the sensor captures the color code and sends to RGB LED
   if( buttonState == HIGH ) {
   Serial.print("C:\t"); Serial.print(clear);
   Serial.print("\tR:\t"); Serial.print(red);
   Serial.print("\tG:\t"); Serial.print(green);
   Serial.print("\tB:\t"); Serial.print(blue);
+
+    //Sending RGB values to LED
+  digitalWrite(redpin, gammatable[(int)red]);
+  digitalWrite(greenpin, gammatable[(int)green]);
+  digitalWrite(bluepin, gammatable[(int)blue]); 
 
   // Figure out some basic hex code for visualization
   uint32_t sum = clear;
@@ -81,12 +83,8 @@ void loop() {
   Serial.print((int)r, HEX); Serial.print((int)g, HEX); Serial.print((int)b, HEX);
   Serial.println();
 
-  //Serial.print((int)r ); Serial.print(" "); Serial.print((int)g);Serial.print(" ");  Serial.println((int)b );
-  digitalWrite(redpin, gammatable[(int)red]);
-  digitalWrite(greenpin, gammatable[(int)green]);
-  digitalWrite(bluepin, gammatable[(int)blue]); 
  }else{
-
+      //Else do nothing. Waiting for the next scan while the RGB light is still on with our last color.
   }
 }
 
