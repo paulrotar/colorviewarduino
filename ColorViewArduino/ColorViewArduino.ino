@@ -62,11 +62,6 @@ void loop() {
   tcs.setInterrupt(true);  // turn off LED
   // When pressing the button, the sensor captures the color code and sends to RGB LED
   if( buttonState == HIGH ) {
-  Serial.print("C:\t"); Serial.print(clear);
-  Serial.print("\tR:\t"); Serial.print(red);
-  Serial.print("\tG:\t"); Serial.print(green);
-  Serial.print("\tB:\t"); Serial.print(blue);
-
     //Sending RGB values to LED
   digitalWrite(redpin, gammatable[(int)red]);
   digitalWrite(greenpin, gammatable[(int)green]);
@@ -79,7 +74,6 @@ void loop() {
   g = green; g /= sum;
   b = blue; b /= sum;
   r *= 256; g *= 256; b *= 256;
-  Serial.print("\t");
   Serial.print((int)r, HEX); Serial.print((int)g, HEX); Serial.print((int)b, HEX);
   Serial.println();
 
